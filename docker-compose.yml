@@ -29,5 +29,20 @@ services:
     depends_on:
       - mongo-auth
 
+ #################################################
+  # API Gateway
+  #################################################
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - AUTH_SERVICE_URL=http://auth-service:8080
+    depends_on:
+      - auth-service
+
 volumes:
   mongo-auth-data:
