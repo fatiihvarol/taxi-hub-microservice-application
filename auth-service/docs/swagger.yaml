@@ -1,0 +1,46 @@
+definitions:
+  dtos.ErrorResponse:
+    properties:
+      error:
+        example: Invalid body
+        type: string
+    type: object
+  dtos.RegisterRequest:
+    properties:
+      email:
+        example: fatih@example.com
+        type: string
+      password:
+        example: "123456"
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Auth
+swagger: "2.0"
