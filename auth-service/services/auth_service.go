@@ -7,6 +7,7 @@ import (
 	"auth-service/utils"
 	"context"
 	"time"
+	"auth-service/config"
 )
 
 func RegisterUser(repo repositories.UserRepository, req *dtos.RegisterRequest) (*dtos.RegisterResponse, *dtos.ErrorResponse) {
@@ -68,4 +69,7 @@ func RefreshUserToken(repo repositories.UserRepository, req *dtos.RefreshRequest
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+func ValidateUserToken(token string) (bool, error) {
+	return utils.ValidateJWT(token, config.GetEnv("JWT_SECRET"))
 }

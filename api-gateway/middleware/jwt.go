@@ -1,33 +1,43 @@
 package middleware
 
 import (
-	"strings"
+	"fmt"
+	"log"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"api-gateway/utils"
 )
 
-// JWTProtected middleware fonksiyonu, JWT doğrular
-func JWTProtected(secret string) fiber.Handler {
+func JWTProtected(authServiceURL string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		authHeader := c.Get("Authorization") // Bearer <token>
+		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing token"})
+			log.Println("[JWTProtected] Missing Authorization header")
+			return c.Status(401).JSON(fiber.Map{"error": "Missing token"})
 		}
 
-		// "Bearer <token>" kısmını ayır
-		tokenParts := strings.Split(authHeader, " ")
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token format"})
+		// Auth-service’e doğrulama isteği at
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/auth/validate", authServiceURL), nil)
+		if err != nil {
+			log.Printf("[JWTProtected] Failed to create request: %v\n", err)
+			return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+		}
+		req.Header.Set("Authorization", authHeader)
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("[JWTProtected] Auth service unreachable: %v\n", err)
+			return c.Status(500).JSON(fiber.Map{"error": "Auth service unreachable"})
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			log.Printf("[JWTProtected] Invalid token. Auth service responded with status: %d\n", resp.StatusCode)
+			return c.Status(401).JSON(fiber.Map{"error": "Invalid token"})
 		}
 
-		token := tokenParts[1]
-
-		valid, err := utils.ValidateJWT(token, secret)
-		if err != nil || !valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
-		}
-
+		log.Println("[JWTProtected] Token validated successfully")
 		return c.Next()
 	}
 }

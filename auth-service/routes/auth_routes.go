@@ -9,6 +9,7 @@ func AuthRoutes(app *fiber.App) {
 app.Post("/auth/register", controllers.Register)
 app.Post("/auth/login", controllers.Login)
 app.Post("/auth/refresh", controllers.RefreshToken)
+app.Get("/auth/validate", controllers.ValidateToken)
 
 
 }

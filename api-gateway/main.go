@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	// .env yükle
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
 	}
@@ -20,11 +19,6 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
-	}
-
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		log.Fatal("JWT_SECRET not set")
 	}
 
 	authServiceURL := os.Getenv("AUTH_SERVICE_URL")
@@ -35,15 +29,14 @@ func main() {
 	app := fiber.New()
 	app.Use(logger.New())
 
-	// JWT Middleware - tüm /api/* endpointleri korur
-	app.Use("/api", middleware.JWTProtected(jwtSecret))
+	// JWT korumalı endpoint
+	app.Use("/api", middleware.JWTProtected(authServiceURL))
 
-	// Örnek protected endpoint
 	app.Get("/api/hello", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "Hello, authorized user!"})
 	})
 
-	// Auth-service route’larını proxy ile yönlendir
+	// Auth service proxy
 	app.All("/auth/*", func(c *fiber.Ctx) error {
 		return proxy.Do(c, authServiceURL+c.OriginalURL())
 	})

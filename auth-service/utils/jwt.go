@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"errors"
 	"time"
+	"errors"
 
 	"auth-service/config"
 	"github.com/golang-jwt/jwt/v5"
@@ -36,9 +36,7 @@ func GenerateRefreshToken(userId string) (string, error) {
 func RefreshJWT(refreshToken string) (string, string, error) {
 	secret := config.GetEnv("REFRESH_SECRET")
 
-	// Token'ı parse et
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
-		// Validate signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
@@ -59,7 +57,6 @@ func RefreshJWT(refreshToken string) (string, string, error) {
 		return "", "", errors.New("invalid user id in token")
 	}
 
-	// Yeni access ve refresh token üret
 	newAccess, err := GenerateAccessToken(userId)
 	if err != nil {
 		return "", "", err
@@ -71,4 +68,20 @@ func RefreshJWT(refreshToken string) (string, string, error) {
 	}
 
 	return newAccess, newRefresh, nil
+}
+
+func ValidateJWT(tokenStr string, secret string) (bool, error) {
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(secret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return false, err
+	}
+
+	return true, nil
 }

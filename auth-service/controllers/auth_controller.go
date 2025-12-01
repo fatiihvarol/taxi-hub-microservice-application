@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"strings"
 	"auth-service/database"
 	"auth-service/dtos"
 	"auth-service/services"
@@ -85,8 +86,36 @@ func RefreshToken(c *fiber.Ctx) error {
 
 	return c.JSON(resp)
 }
+// ValidateToken godoc
+// @Summary Validate JWT token
+// @Description Checks if the JWT token is valid
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/validate [get]
+func ValidateToken(c *fiber.Ctx) error {
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return c.Status(401).JSON(fiber.Map{"valid": false, "error": "Missing token"})
+	}
 
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return c.Status(401).JSON(fiber.Map{"valid": false, "error": "Invalid token format"})
+	}
 
+	token := parts[1]
+
+	valid, err := services.ValidateUserToken(token)
+	if err != nil || !valid {
+		return c.Status(401).JSON(fiber.Map{"valid": false, "error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"valid": true})
+}
 
 
 
