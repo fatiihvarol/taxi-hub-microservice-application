@@ -1,14 +1,11 @@
 package controllers
 
 import (
-    "auth-service/database"
-    "auth-service/dtos"
-    "auth-service/models"
-    "auth-service/utils"
-    "context"
-    "time"
-
-    "github.com/gofiber/fiber/v2"
+	"auth-service/database"
+	"auth-service/dtos"
+	"auth-service/services"
+	"auth-service/repositories"
+	"github.com/gofiber/fiber/v2"
 )
 
 // Register godoc
@@ -17,32 +14,25 @@ import (
 // @Accept json
 // @Produce json
 // @Param body body dtos.RegisterRequest true "User info"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} dtos.RegisterResponse
 // @Failure 400 {object} dtos.ErrorResponse
+// @Failure 500 {object} dtos.ErrorResponse
 // @Router /auth/register [post]
 func Register(c *fiber.Ctx) error {
-    body := new(dtos.RegisterRequest)
-    if err := c.BodyParser(body); err != nil {
-        return c.Status(400).JSON(fiber.Map{"error": "Invalid body"})
-    }
+	body := new(dtos.RegisterRequest)
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(400).JSON(dtos.ErrorResponse{Error: "Invalid body"})
+	}
 
-    // Hash password
-    hashed, _ := utils.HashPassword(body.Password)
+	// Mongo repository
+	userRepo := repositories.NewMongoUserRepository(database.UserCollection)
 
-    user := models.User{
-        Email:     body.Email,
-        Password:  hashed,
-        CreatedAt: time.Now(),
-        UpdatedAt: time.Now(),
-    }
+	// Service çağrısı
+	resp, errResp := services.RegisterUser(userRepo, body)
+	if errResp != nil {
+		return c.Status(400).JSON(errResp)
+	}
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-
-    _, err := database.UserCollection.InsertOne(ctx, user)
-    if err != nil {
-        return c.Status(500).JSON(fiber.Map{"error": "DB error"})
-    }
-
-    return c.JSON(fiber.Map{"message": "registered"})
+	return c.JSON(resp)
 }
+
