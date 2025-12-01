@@ -31,3 +31,41 @@ func RegisterUser(repo repositories.UserRepository, req *dtos.RegisterRequest) (
 
 	return &dtos.RegisterResponse{Message: "registered"}, nil
 }
+func LoginUser(repo repositories.UserRepository, req *dtos.LoginRequest) (*dtos.LoginResponse, *dtos.ErrorResponse) {
+	user, err := repo.FindByEmail(context.Background(), req.Email)
+	if err != nil {
+		return nil, &dtos.ErrorResponse{Error: "User not found"}
+	}
+
+	if !utils.CheckPasswordHash(req.Password, user.Password) {
+		return nil, &dtos.ErrorResponse{Error: "Invalid credentials"}
+	}
+
+	accessToken, err := utils.GenerateAccessToken(user.Email)
+	if err != nil {
+		return nil, &dtos.ErrorResponse{Error: "Could not generate access token"}
+	}
+
+	refreshToken, err := utils.GenerateRefreshToken(user.Email)
+	if err != nil {
+		return nil, &dtos.ErrorResponse{Error: "Could not generate refresh token"}
+	}
+
+	return &dtos.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func RefreshUserToken(repo repositories.UserRepository, req *dtos.RefreshRequest) (*dtos.LoginResponse, *dtos.ErrorResponse) {
+	// Refresh token doğrulama ve yeni access/refresh token üret
+	accessToken, refreshToken, err := utils.RefreshJWT(req.RefreshToken)
+	if err != nil {
+		return nil, &dtos.ErrorResponse{Error: err.Error()}
+	}
+
+	return &dtos.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
