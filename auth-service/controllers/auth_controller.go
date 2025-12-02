@@ -107,15 +107,18 @@ func ValidateToken(c *fiber.Ctx) error {
 		return c.Status(401).JSON(fiber.Map{"valid": false, "error": "Invalid token format"})
 	}
 
-	token := parts[1]
-
-	valid, err := services.ValidateUserToken(token)
-	if err != nil || !valid {
+	user, err := services.ValidateUserToken(parts[1])
+	if err != nil {
 		return c.Status(401).JSON(fiber.Map{"valid": false, "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"valid": true})
+	return c.JSON(fiber.Map{
+		"valid": true,
+		"userId": user.ID,
+		"role": user.Role,
+	})
 }
+
 
 
 
