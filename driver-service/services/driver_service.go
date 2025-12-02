@@ -14,14 +14,14 @@ func NewDriverService(repo repositories.DriverRepository) *DriverService {
 	return &DriverService{Repo: repo}
 }
 
-func (s *DriverService) CreateDriver(driver *models.Driver) (*models.Driver, error) {
-	id, err := s.Repo.Create(driver)
-	if err != nil {
-		return nil, err
-	}
-	driver.ID = id
-	return driver, nil
+func (s *DriverService) CreateDriver(driver *models.Driver) (string, error) {
+    id, err := s.Repo.Create(driver)
+    if err != nil {
+        return "", err
+    }
+    return id, nil
 }
+
 
 func (s *DriverService) UpdateDriver(id string, driver *models.Driver) (*models.Driver, error) {
 	err := s.Repo.Update(id, driver)
