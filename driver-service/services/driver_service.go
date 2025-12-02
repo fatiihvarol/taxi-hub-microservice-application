@@ -5,18 +5,24 @@ import (
 	"driver-service/models"
 	"driver-service/repositories"
 	"time"
+	"driver-service/validators"
 )
 
 type DriverService struct {
 	Repo repositories.DriverRepository
+	Validator *validator.DriverValidator
 }
 
 func NewDriverService(repo repositories.DriverRepository) *DriverService {
-	return &DriverService{Repo: repo}
+	return &DriverService{Repo: repo, Validator: validator.NewDriverValidator()}
 }
 
 // CreateDriver artık DTO alıyor
-func (s *DriverService) CreateDriver(req *dtos.CreateDriverRequest) (*dtos.CreateDriverResponse, error) {
+func (s *DriverService) CreateDriver(req *dtos.CreateDriverRequest) (*dtos.CreateDriverResponse, *dtos.ValidationResponse, error) {
+	if validation := s.Validator.ValidateCreateDriver(req); validation != nil {
+		return nil, validation, nil
+	}
+
 	driver := &models.Driver{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -29,16 +35,20 @@ func (s *DriverService) CreateDriver(req *dtos.CreateDriverRequest) (*dtos.Creat
 
 	id, err := s.Repo.Create(driver)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-return &dtos.CreateDriverResponse{
-    ID: id,
-}, nil
+	return &dtos.CreateDriverResponse{ID: id}, nil, nil
 }
 
+
 // UpdateDriver artık DTO alıyor
-func (s *DriverService) UpdateDriver(id string, req *dtos.UpdateDriverRequest) (*dtos.UpdateDriverResponse, error) {
+func (s *DriverService) UpdateDriver(id string, req *dtos.UpdateDriverRequest) (*dtos.UpdateDriverResponse, *dtos.ValidationResponse, error) {
+	// Validasyon
+	if validation := s.Validator.ValidateUpdateDriver(req); validation != nil {
+		return nil, validation, nil
+	}
+
 	driver := &models.Driver{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -48,17 +58,18 @@ func (s *DriverService) UpdateDriver(id string, req *dtos.UpdateDriverRequest) (
 		CarModel:  req.CarModel,
 	}
 
-	err := s.Repo.Update(id, driver)
-	if err != nil {
-		return nil, err
+	// Update işlemi
+	if err := s.Repo.Update(id, driver); err != nil {
+		return nil, nil, err
 	}
 	driver.ID = id
 
-return &dtos.UpdateDriverResponse{
-    ID:        driver.ID,
-    UpdatedAt: time.Now().Format(time.RFC3339),
-}, nil
+	return &dtos.UpdateDriverResponse{
+		ID:        driver.ID,
+		UpdatedAt: time.Now().Format(time.RFC3339),
+	}, nil, nil
 }
+
 
 func (s *DriverService) ListDrivers(page, pageSize int) ([]models.Driver, error) {
 	return s.Repo.List(page, pageSize)

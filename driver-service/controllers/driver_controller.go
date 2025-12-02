@@ -37,12 +37,15 @@ func (c *DriverController) CreateDriver(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	resp, err := c.driverService.CreateDriver(&req)
-	if err != nil {
-		return fiber.NewError(500, err.Error())
+	resp, validation, err := c.driverService.CreateDriver(&req)
+	if validation != nil {
+		return ctx.Status(400).JSON(validation)
 	}
-
+	if err != nil {
+		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
 	return ctx.Status(201).JSON(resp)
+
 }
 
 
@@ -63,12 +66,15 @@ func (c *DriverController) UpdateDriver(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	resp, err := c.driverService.UpdateDriver(id, &req)
-	if err != nil {
-		return fiber.NewError(500, err.Error())
+	resp, validation, err := c.driverService.UpdateDriver(id, &req)
+	if validation != nil {
+		return ctx.Status(400).JSON(validation)
 	}
-
+	if err != nil {
+		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
 	return ctx.JSON(resp)
+
 }
 
 // List Drivers
