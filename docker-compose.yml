@@ -36,7 +36,7 @@ services:
     image: mongo
     container_name: mongo-driver
     ports:
-      - "27018:27017"  # Host port farklı olabilir
+      - "27018:27017"
     volumes:
       - mongo-driver-data:/data/db
 
@@ -56,6 +56,34 @@ services:
       - mongo-driver
 
   #################################################
+  # Elasticsearch (Log storage)
+  #################################################
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  #################################################
+  # Kibana (Log dashboard)
+  #################################################
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  #################################################
   # API Gateway
   #################################################
   api-gateway:
@@ -68,10 +96,14 @@ services:
       - PORT=8000
       - AUTH_SERVICE_URL=http://auth-service:8080
       - DRIVER_SERVICE_URL=http://driver-service:8090
+      - ELASTIC_URL=http://elasticsearch:9200
+      - ELASTIC_INDEX=gateway-logs
     depends_on:
       - auth-service
       - driver-service
+      - elasticsearch
 
 volumes:
   mongo-auth-data:
   mongo-driver-data:
+  esdata:
