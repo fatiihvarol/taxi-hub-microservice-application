@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
@@ -29,17 +28,17 @@ func main() {
 	app := fiber.New()
 	app.Use(logger.New())
 
-	// JWT korumalı endpoint
-	app.Use("/api", middleware.JWTProtected(authServiceURL))
+	// Her endpoint ayrı ayrı role bazlı middleware ile korunabilir
+	app.Get("/api/hello", middleware.JWTProtected(authServiceURL)) // token geçerli olan herkes
+	app.Get("/api/admin", middleware.JWTProtected(authServiceURL, "admin")) // sadece admin
+	app.Get("/api/driver/updateLocation", middleware.JWTProtected(authServiceURL, "driver")) // sadece driver
+	app.Get("/api/location/nearby", middleware.JWTProtected(authServiceURL, "customer", "driver")) // customer ve driver
 
-	app.Get("/api/hello", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"message": "Hello, authorized user!"})
-	})
-
-	// Auth service proxy
+	// Auth service proxy (register/login/validate gibi)
 	app.All("/auth/*", func(c *fiber.Ctx) error {
 		return proxy.Do(c, authServiceURL+c.OriginalURL())
 	})
 
 	log.Fatal(app.Listen(":" + port))
 }
+
