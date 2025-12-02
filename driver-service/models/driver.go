@@ -4,6 +4,7 @@ import "time"
 
 type Driver struct {
     ID        string    `json:"id" bson:"_id,omitempty"`
+    UserId         string    `json:"userId" bson:"userId,omitempty"`
     FirstName string    `json:"firstName" bson:"firstName"`
     LastName  string    `json:"lastName" bson:"lastName"`
     Plate     string    `json:"plate" bson:"plate"`

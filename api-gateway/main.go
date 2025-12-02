@@ -11,6 +11,7 @@ import (
 	"api-gateway/elastic"
 	"api-gateway/middleware"
 	"api-gateway/routes"
+
 )
 
 func main() {
@@ -30,6 +31,9 @@ func main() {
 
 	// Fiber
 	app := fiber.New()
+	app.Use(middleware.APIKeyMiddleware()) 
+
+	app.Use(middleware.RateLimiter())
 
 	// Normal log (console log)
 	app.Use(logger.New())

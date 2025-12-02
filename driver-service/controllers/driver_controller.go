@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"driver-service/dtos"
-	"driver-service/models"
 	"driver-service/repositories"
 	"driver-service/services"
 	"github.com/gofiber/fiber/v2"
@@ -38,22 +37,14 @@ func (c *DriverController) CreateDriver(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	driver := &models.Driver{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Plate:     req.Plate,
-		TaxiType:  req.TaxiType,
-		CarBrand:  req.CarBrand,
-		CarModel:  req.CarModel,
-	}
-
-	resp, err := c.driverService.CreateDriver(driver)
+	resp, err := c.driverService.CreateDriver(&req)
 	if err != nil {
 		return fiber.NewError(500, err.Error())
 	}
 
 	return ctx.Status(201).JSON(resp)
 }
+
 
 // Update Driver
 // @Summary Update Driver
@@ -72,16 +63,7 @@ func (c *DriverController) UpdateDriver(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	driver := &models.Driver{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Plate:     req.Plate,
-		TaxiType:  req.TaxiType,
-		CarBrand:  req.CarBrand,
-		CarModel:  req.CarModel,
-	}
-
-	resp, err := c.driverService.UpdateDriver(id, driver)
+	resp, err := c.driverService.UpdateDriver(id, &req)
 	if err != nil {
 		return fiber.NewError(500, err.Error())
 	}

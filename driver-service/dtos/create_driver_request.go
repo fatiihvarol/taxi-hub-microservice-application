@@ -7,4 +7,5 @@ type CreateDriverRequest struct {
     TaxiType  string `json:"taxiType"`
     CarBrand  string `json:"carBrand"`
     CarModel  string `json:"carModel"`
+    UserId    string `json:"userId"`
 }
