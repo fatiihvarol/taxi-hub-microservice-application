@@ -1,0 +1,181 @@
+definitions:
+  dtos.CreateDriverRequest:
+    properties:
+      carBrand:
+        type: string
+      carModel:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      plate:
+        type: string
+      taxiType:
+        type: string
+    type: object
+  dtos.CreateDriverResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  dtos.DriverListItem:
+    properties:
+      carBrand:
+        type: string
+      carModel:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      lat:
+        type: number
+      lon:
+        type: number
+      plate:
+        type: string
+      taxiType:
+        type: string
+    type: object
+  dtos.NearbyDriverResponse:
+    properties:
+      distanceKm:
+        type: number
+      firstName:
+        type: string
+      lastName:
+        type: string
+      plate:
+        type: string
+    type: object
+  dtos.UpdateDriverRequest:
+    properties:
+      carBrand:
+        type: string
+      carModel:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      plate:
+        type: string
+      taxiType:
+        type: string
+    type: object
+  dtos.UpdateDriverResponse:
+    properties:
+      id:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /drivers:
+    get:
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.DriverListItem'
+            type: array
+      summary: List Drivers
+      tags:
+      - Drivers
+    post:
+      consumes:
+      - application/json
+      description: Yeni driver oluşturur
+      parameters:
+      - description: Driver
+        in: body
+        name: driver
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateDriverRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.CreateDriverResponse'
+      summary: Create Driver
+      tags:
+      - Drivers
+  /drivers/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Driver
+        in: body
+        name: driver
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateDriverRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.UpdateDriverResponse'
+      summary: Update Driver
+      tags:
+      - Drivers
+  /drivers/nearby:
+    get:
+      parameters:
+      - description: Latitude
+        format: float64
+        in: query
+        name: lat
+        required: true
+        type: number
+      - description: Longitude
+        format: float64
+        in: query
+        name: lon
+        required: true
+        type: number
+      - description: Taxi type
+        in: query
+        name: taksiType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.NearbyDriverResponse'
+            type: array
+      summary: Get Nearby Drivers
+      tags:
+      - Drivers
+swagger: "2.0"

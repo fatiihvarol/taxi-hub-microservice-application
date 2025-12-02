@@ -29,7 +29,33 @@ services:
     depends_on:
       - mongo-auth
 
- #################################################
+  #################################################
+  # MongoDB for Driver Service
+  #################################################
+  mongo-driver:
+    image: mongo
+    container_name: mongo-driver
+    ports:
+      - "27018:27017"  # Host port farklı olabilir
+    volumes:
+      - mongo-driver-data:/data/db
+
+  #################################################
+  # Driver Service
+  #################################################
+  driver-service:
+    build: ./driver-service
+    container_name: driver-service
+    restart: always
+    ports:
+      - "8090:8090"
+    environment:
+      - MONGO_URI=mongodb://mongo-driver:27017
+      - MONGO_DB=driverdb
+    depends_on:
+      - mongo-driver
+
+  #################################################
   # API Gateway
   #################################################
   api-gateway:
@@ -41,8 +67,11 @@ services:
     environment:
       - PORT=8000
       - AUTH_SERVICE_URL=http://auth-service:8080
+      - DRIVER_SERVICE_URL=http://driver-service:8090
     depends_on:
       - auth-service
+      - driver-service
 
 volumes:
   mongo-auth-data:
+  mongo-driver-data:
