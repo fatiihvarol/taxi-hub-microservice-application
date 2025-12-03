@@ -13,6 +13,8 @@ definitions:
         type: string
       taxiType:
         type: string
+      userId:
+        type: string
     type: object
   dtos.CreateDriverResponse:
     properties:
@@ -178,4 +180,19 @@ paths:
       summary: Get Nearby Drivers
       tags:
       - Drivers
+  /health:
+    get:
+      description: Servis durumu kontrolü
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - System
 swagger: "2.0"

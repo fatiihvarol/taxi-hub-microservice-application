@@ -18,6 +18,9 @@ definitions:
         type: string
       refresh_token:
         type: string
+      role:
+        description: 'opsiyonel: admin, driver, customer'
+        type: string
     type: object
   dtos.RefreshRequest:
     properties:
@@ -31,6 +34,10 @@ definitions:
         type: string
       password:
         example: "123456"
+        type: string
+      role:
+        description: admin, driver, customer
+        example: customer
         type: string
     type: object
   dtos.RegisterResponse:

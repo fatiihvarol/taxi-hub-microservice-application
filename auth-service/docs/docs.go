@@ -212,6 +212,10 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "type": "string"
+                },
+                "role": {
+                    "description": "opsiyonel: admin, driver, customer",
+                    "type": "string"
                 }
             }
         },
@@ -233,6 +237,11 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "123456"
+                },
+                "role": {
+                    "description": "admin, driver, customer",
+                    "type": "string",
+                    "example": "customer"
                 }
             }
         },

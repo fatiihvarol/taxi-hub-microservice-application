@@ -201,6 +201,10 @@
                 },
                 "refresh_token": {
                     "type": "string"
+                },
+                "role": {
+                    "description": "opsiyonel: admin, driver, customer",
+                    "type": "string"
                 }
             }
         },
@@ -222,6 +226,11 @@
                 "password": {
                     "type": "string",
                     "example": "123456"
+                },
+                "role": {
+                    "description": "admin, driver, customer",
+                    "type": "string",
+                    "example": "customer"
                 }
             }
         },

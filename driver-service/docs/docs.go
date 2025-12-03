@@ -169,6 +169,29 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/health": {
+            "get": {
+                "description": "Servis durumu kontrolü",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -191,6 +214,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "taxiType": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
