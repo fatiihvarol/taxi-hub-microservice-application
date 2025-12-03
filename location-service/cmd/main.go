@@ -3,21 +3,24 @@ package main
 import (
     "github.com/gofiber/fiber/v2"
     "location-service/config"
-    "location-service/controller"
+    "location-service/controllers"
     "location-service/routes"
-    "location-service/service"
+    "location-service/services"
     redisrepo "location-service/infrastructure/redis"
 )
 
 func main() {
+    config.LoadEnv()
     config.ConnectRedis()
 
     repo := redisrepo.NewRedisLocationRepository()
-    service := service.NewLocationService(repo)
-    controller := controller.NewLocationController(service)
+    svc := services.NewLocationService(repo)
+    ctrl := controllers.NewLocationController(svc)
 
     app := fiber.New()
-    routes.SetupRoutes(app, controller)
 
-    app.Listen(":8081")
+    // REST ve WebSocket route’larını ekle
+    routes.SetupRoutes(app, ctrl, svc)
+
+    app.Listen(":" + config.AppPort)
 }

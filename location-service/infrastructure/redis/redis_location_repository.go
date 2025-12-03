@@ -6,7 +6,8 @@ import (
     "fmt"
     "location-service/models"
     "location-service/config"
-    "location-service/calc"
+    "location-service/calculation"
+    "github.com/go-redis/redis/v8"
 )
 
 type RedisLocationRepository struct {

@@ -3,9 +3,10 @@ module location-service
 go 1.25.4
 
 require (
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.52.10
 	github.com/gofiber/websocket/v2 v2.2.1
-	github.com/redis/go-redis/v9 v9.17.2
+	github.com/joho/godotenv v1.5.1
 )
 
 require (

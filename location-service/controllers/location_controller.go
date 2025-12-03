@@ -5,7 +5,7 @@ import (
     "github.com/gofiber/fiber/v2"
     "location-service/dtos"
     "location-service/models"
-    "location-service/service"
+    "location-service/services"
 )
 
 type LocationController struct {
@@ -17,8 +17,6 @@ func NewLocationController(s *service.LocationService) *LocationController {
 }
 
 func (c *LocationController) UpdateLocation(ctx *fiber.Ctx) error {
-    driverID := ctx.Params("driverId")
-
     var req dtos.UpdateLocationRequest
     if err := ctx.BodyParser(&req); err != nil {
         return fiber.ErrBadRequest
@@ -31,13 +29,15 @@ func (c *LocationController) UpdateLocation(ctx *fiber.Ctx) error {
         UpdatedAt: time.Now().Unix(),
     }
 
-    err := c.service.Update(driverID, loc)
+    // driverID artık body’den geliyor
+    err := c.service.Update(req.DriverID, loc)
     if err != nil {
         return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
     }
 
     return ctx.JSON(fiber.Map{"status": "ok"})
 }
+
 
 func (c *LocationController) GetNearby(ctx *fiber.Ctx) error {
     lat := ctx.QueryFloat("lat")

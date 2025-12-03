@@ -56,6 +56,35 @@ services:
       - mongo-driver
 
   #################################################
+  # Redis for Location Service
+  #################################################
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  #################################################
+  # Location Service
+  #################################################
+  location-service:
+    build: ./location-service
+    container_name: location-service
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - APP_PORT=8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - NEARBY_RADIUS_KM=5
+      - NEARBY_COUNT=20
+    depends_on:
+      - redis
+
+  #################################################
   # Elasticsearch (Log storage)
   #################################################
   elasticsearch:
@@ -96,11 +125,13 @@ services:
       - PORT=8000
       - AUTH_SERVICE_URL=http://auth-service:8080
       - DRIVER_SERVICE_URL=http://driver-service:8090
+      - LOCATION_SERVICE_URL=http://location-service:8081
       - ELASTIC_URL=http://elasticsearch:9200
       - ELASTIC_INDEX=gateway-logs
     depends_on:
       - auth-service
       - driver-service
+      - location-service
       - elasticsearch
 
 volumes:
