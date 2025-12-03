@@ -7,10 +7,10 @@ import (
     "github.com/gofiber/websocket/v2"
     "location-service/dtos"
     "location-service/models"
-    "location-service/services" 
+    "location-service/services" // services olarak import
+)
 
-
-func DriverSocketHandler(service *service.LocationService) func(*websocket.Conn) {
+func DriverSocketHandler(service *services.LocationService) func(*websocket.Conn) { // services olarak kullan
     return func(c *websocket.Conn) {
         defer c.Close()
         for {
@@ -35,4 +35,3 @@ func DriverSocketHandler(service *service.LocationService) func(*websocket.Conn)
         }
     }
 }
-
